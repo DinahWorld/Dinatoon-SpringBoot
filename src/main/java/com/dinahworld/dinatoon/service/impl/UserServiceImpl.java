@@ -1,8 +1,10 @@
 package com.dinahworld.dinatoon.service.impl;
 
+import com.dinahworld.dinatoon.enums.RoleEnum;
 import com.dinahworld.dinatoon.exception.UserException;
 import com.dinahworld.dinatoon.model.User;
 import com.dinahworld.dinatoon.repository.UserRepository;
+import com.dinahworld.dinatoon.service.RoleService;
 import com.dinahworld.dinatoon.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private static final String USER_NOT_FOUND = "User not found with ID : ";
     private final UserRepository userRepository;
+    private final RoleService roleService;
 
     @Override
     @Transactional
@@ -50,5 +53,21 @@ public class UserServiceImpl implements UserService {
         userRepository.deleteById(id);
         userRepository.save(user);
         return user;
+    }
+
+    @Override
+    @Transactional
+    public User createUserOAuth2(String email, String authType) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            return userRepository.findByEmail(email).get();
+        }
+        User user = new User();
+        user.setProvider(authType);
+        user.setEmail(email);
+        user.setUsername(email.substring(0, email.indexOf("@")));
+        user.setRole(roleService.getRoleByName(RoleEnum.USER));
+
+        User createdUser = userRepository.save(user);
+        return createdUser;
     }
 }

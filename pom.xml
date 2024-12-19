@@ -28,10 +28,10 @@
     </scm>
     <properties>
         <java.version>23</java.version>
-
         <jsonwebtoken.version>0.12.6</jsonwebtoken.version>
         <openapi.version>2.6.0</openapi.version>
-        <mockito.version>5.14.1</mockito.version>
+        <mockito.version>5.14.2</mockito.version>
+        <google.version>2.7.1</google.version>
     </properties>
 
 
@@ -51,6 +51,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -112,6 +116,11 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${openapi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>${google.version}</version>
         </dependency>
     </dependencies>
 

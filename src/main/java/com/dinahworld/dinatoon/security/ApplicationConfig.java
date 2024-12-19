@@ -2,6 +2,7 @@ package com.dinahworld.dinatoon.security;
 
 import com.dinahworld.dinatoon.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,6 +19,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class ApplicationConfig {
     private final UserService userService;
+    @Value("${spring.security.oauth2.resourceserver.opaque-token.introspection-uri}")
+    private String instrospectUri;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -47,4 +50,5 @@ public class ApplicationConfig {
     public WebClient mangaDexApiClient() {
         return WebClient.create("https://api.mangadex.org");
     }
+
 }

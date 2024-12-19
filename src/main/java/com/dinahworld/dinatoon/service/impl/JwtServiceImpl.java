@@ -1,5 +1,6 @@
-package com.dinahworld.dinatoon.security;
+package com.dinahworld.dinatoon.service.impl;
 
+import com.dinahworld.dinatoon.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -17,25 +18,28 @@ import java.util.function.Function;
 import static io.jsonwebtoken.Jwts.parser;
 
 @Service
-public class JwtServiceImpl {
+public class JwtServiceImpl implements JwtService {
 
     @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
-
+    @Override
     public String extractEmail(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    @Override
     public String generateToken(UserDetails userDetails) {
         return generateToken(new HashMap<>(), userDetails);
     }
 
+    @Override
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
+    @Override
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String email = extractEmail(token);
         return (email.equals(userDetails.getUsername())) && !isTokenExpired(token);
