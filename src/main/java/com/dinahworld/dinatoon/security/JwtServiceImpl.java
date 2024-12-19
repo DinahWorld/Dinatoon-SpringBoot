@@ -1,4 +1,4 @@
-package com.dinahworld.dinatoon.infrastructure.security;
+package com.dinahworld.dinatoon.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

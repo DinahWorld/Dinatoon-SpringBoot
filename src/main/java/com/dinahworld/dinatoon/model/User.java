@@ -1,4 +1,4 @@
-package com.dinahworld.dinatoon.domain.model;
+package com.dinahworld.dinatoon.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

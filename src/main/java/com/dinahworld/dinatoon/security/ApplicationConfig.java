@@ -1,6 +1,6 @@
-package com.dinahworld.dinatoon.infrastructure.security;
+package com.dinahworld.dinatoon.security;
 
-import com.dinahworld.dinatoon.application.ports.input.UserService;
+import com.dinahworld.dinatoon.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.reactive.function.client.WebClient;
 
 
 @Configuration
@@ -32,7 +33,6 @@ public class ApplicationConfig {
         return authProvider;
     }
 
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -41,5 +41,10 @@ public class ApplicationConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public WebClient mangaDexApiClient() {
+        return WebClient.create("https://api.mangadex.org");
     }
 }

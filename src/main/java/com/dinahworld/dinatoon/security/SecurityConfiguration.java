@@ -1,4 +1,4 @@
-package com.dinahworld.dinatoon.infrastructure.security;
+package com.dinahworld.dinatoon.security;
 
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;

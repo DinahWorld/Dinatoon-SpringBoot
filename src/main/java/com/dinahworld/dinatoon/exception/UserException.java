@@ -1,4 +1,4 @@
-package com.dinahworld.dinatoon.domain.exception;
+package com.dinahworld.dinatoon.exception;
 
 public class UserException extends DinatoonException {
     public UserException(String error) {

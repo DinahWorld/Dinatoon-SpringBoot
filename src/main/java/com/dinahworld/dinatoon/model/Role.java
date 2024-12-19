@@ -1,5 +1,6 @@
-package com.dinahworld.dinatoon.domain.model;
+package com.dinahworld.dinatoon.model;
 
+import com.dinahworld.dinatoon.enums.RoleEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.dinahworld.dinatoon.domain.exception;
+package com.dinahworld.dinatoon.exception;
 
 import lombok.Getter;
 

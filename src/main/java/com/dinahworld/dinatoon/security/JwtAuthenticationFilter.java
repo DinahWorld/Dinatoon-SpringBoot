@@ -1,4 +1,4 @@
-package com.dinahworld.dinatoon.infrastructure.security;
+package com.dinahworld.dinatoon.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
