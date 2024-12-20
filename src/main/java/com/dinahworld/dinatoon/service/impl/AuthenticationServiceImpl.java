@@ -25,18 +25,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Arrays;
 
-/**
- * Service class for handling user authentication and registration.
- * This service provides methods for user registration and authentication, including generating JWT tokens
- * for authenticated users.
- */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final static String websiteUrl = "http://localhost:4200/";
-    private final static String serverUrl = "http://localhost:4200/";
+    private final String websiteUrl = "http://localhost:4321";
+    private final String serverUrl = "http://localhost:4321";
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -109,7 +104,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public String getGoogleOauthURL() {
         return new GoogleAuthorizationCodeRequestUrl(
                 clientId,
-                websiteUrl + "/home",
+                websiteUrl,
                 Arrays.asList("email", "profile", "openid")
         ).build();
     }
@@ -123,7 +118,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     clientId,
                     clientSecret,
                     code,
-                    websiteUrl + "/home"
+                    websiteUrl
             ).execute();
 
             GoogleIdToken idToken = token.parseIdToken();

@@ -1,5 +1,6 @@
-package com.dinahworld.dinatoon.dto;
+package com.dinahworld.dinatoon.dto.mapper;
 
+import com.dinahworld.dinatoon.dto.UserAuthDto;
 import com.dinahworld.dinatoon.enums.RoleEnum;
 import com.dinahworld.dinatoon.model.User;
 import com.dinahworld.dinatoon.service.RoleService;
@@ -22,6 +23,8 @@ public class UserAuthDtoMapper implements Function<UserAuthDto, User> {
         user.setUsername(dto.username());
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setRole(roleService.getRoleByName(RoleEnum.USER));
+        user.setEnabled(false);
+        user.setProvider("DATABASE");
         return user;
     }
 }

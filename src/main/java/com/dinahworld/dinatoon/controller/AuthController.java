@@ -1,6 +1,10 @@
 package com.dinahworld.dinatoon.controller;
 
-import com.dinahworld.dinatoon.dto.*;
+import com.dinahworld.dinatoon.dto.AuthenticateDto;
+import com.dinahworld.dinatoon.dto.DinatoonResponse;
+import com.dinahworld.dinatoon.dto.UrlDto;
+import com.dinahworld.dinatoon.dto.UserAuthDto;
+import com.dinahworld.dinatoon.dto.mapper.UserAuthDtoMapper;
 import com.dinahworld.dinatoon.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,9 +38,9 @@ public class AuthController {
     @GetMapping("/url")
     @Operation(summary = "Google OAuth")
     @ApiResponse(responseCode = "200")
-    public ResponseEntity<UrlDTO> auth() {
+    public ResponseEntity<UrlDto> auth() {
         var url = authenticationService.getGoogleOauthURL();
-        return ResponseEntity.ok(new UrlDTO(url));
+        return ResponseEntity.ok(new UrlDto(url));
     }
 
     @GetMapping("/callback")
