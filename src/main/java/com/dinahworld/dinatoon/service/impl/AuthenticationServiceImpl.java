@@ -13,6 +13,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeToken
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +44,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private String clientSecret;
 
     @Override
+    @Transactional
     public DinatoonResponse register(User user) {
-        userService.createUser(user);
+        userService.saveUser(user);
         createTokenAndSendEmail(user);
         return new DinatoonResponse("Mail sent");
     }
@@ -74,7 +76,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
             String token = jwtService.generateToken(user);
             log.info("User {} is authenticated", user.getId());
-            userService.createUser(user);
+            userService.saveUser(user);
             return token;
 
         } catch (Exception e) {
@@ -90,7 +92,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (token != null) {
             User user = userService.getUserByEmail(token.getUser().getEmail());
             user.setEnabled(true);
-            userService.createUser(user);
+            userService.saveUser(user);
             log.info("User {} has confirmed his account", user.getEmail());
             confirmationTokenService.delete(user);
             return new DinatoonResponse("Mail Confirmed");

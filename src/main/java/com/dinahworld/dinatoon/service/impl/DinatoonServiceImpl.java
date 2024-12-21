@@ -6,6 +6,7 @@ import com.dinahworld.dinatoon.exception.UserException;
 import com.dinahworld.dinatoon.model.Dinatoon;
 import com.dinahworld.dinatoon.repository.DinatoonRepository;
 import com.dinahworld.dinatoon.service.DinatoonService;
+import com.dinahworld.dinatoon.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,14 @@ public class DinatoonServiceImpl implements DinatoonService {
     private final DinatoonRepository dinatoonRepository;
     private final WebClient webClient;
     private final String ATTRIBUTES = "attributes";
+    private final UserService userService;
 
     @Override
     @Transactional
     public Dinatoon createDinatoon(DinatoonDto dto) {
+        if (dinatoonRepository.findByName(dto.getName())) {
+            throw new DinatoonException("Dinatoon already exist");
+        }
         return dinatoonRepository.save(toEntity(dto));
     }
 
@@ -76,6 +81,38 @@ public class DinatoonServiceImpl implements DinatoonService {
                 .bodyToMono(JsonNode.class)
                 .map(this::mapJsonDataToDinatoon);
     }
+
+    @Override
+    @Transactional
+    public Dinatoon saveManga(DinatoonDto dto, Long id) {
+        var user = userService.getUserById(id);
+        var dinatoon = createDinatoon(dto);
+
+        if (!user.getDinatoons().contains(dinatoon)) {
+            user.getDinatoons().add(dinatoon);
+            userService.saveUser(user);
+            return dinatoon;
+        } else {
+            throw new UserException("Dinatoon already exists in User List");
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<Dinatoon> getAllUserDinatoon(Long id) {
+        return userService.getUserById(id).getDinatoons();
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserDinatoon(Long userId, Long dinatoonId) {
+        var user = userService.getUserById(userId);
+        var dinatoon = getDinatoonById(dinatoonId);
+        user.getDinatoons().remove(dinatoon);
+        userService.saveUser(user);
+    }
+
+
 
     private List<Dinatoon> mapJsonDataToDinatoon(JsonNode jsonNode) {
         var mangas = new ArrayList<Dinatoon>();

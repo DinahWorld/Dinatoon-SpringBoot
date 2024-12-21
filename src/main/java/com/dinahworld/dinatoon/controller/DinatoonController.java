@@ -2,12 +2,14 @@ package com.dinahworld.dinatoon.controller;
 
 import com.dinahworld.dinatoon.dto.DinatoonDto;
 import com.dinahworld.dinatoon.model.Dinatoon;
+import com.dinahworld.dinatoon.model.User;
 import com.dinahworld.dinatoon.service.DinatoonService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +28,7 @@ public class DinatoonController {
         return ResponseEntity.ok(dinatoonService.searchDinatoon(title));
     }
 
-    @GetMapping
+    @GetMapping("/all")
     @Operation(description = "Get All Dinatoon")
     public ResponseEntity<List<Dinatoon>> getAllDinatoons() {
         return ResponseEntity.ok(dinatoonService.getAllDinatoons());
@@ -38,10 +40,26 @@ public class DinatoonController {
         return ResponseEntity.ok(dinatoonService.getDinatoonById(id));
     }
 
-    @PostMapping
+    @PostMapping("/save/user")
     @Operation(description = "Save Manga from MangaDex data Dinatoon Database")
-    public ResponseEntity<Dinatoon> saveManga(@ParameterObject @Valid DinatoonDto dto) {
-        return ResponseEntity.ok(dinatoonService.createDinatoon(dto));
+    public ResponseEntity<Dinatoon> saveManga(Authentication authentication, @ParameterObject @Valid DinatoonDto dto) {
+        var user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(dinatoonService.saveManga(dto, user.getId()));
+    }
+
+    @GetMapping("/all/user")
+    @Operation(description = "Get All Dinatoon From User")
+    public ResponseEntity<List<Dinatoon>> getAllDinatoonFromUser(Authentication authentication) {
+        var user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(dinatoonService.getAllUserDinatoon(user.getId()));
+    }
+
+    @DeleteMapping("/user/{dinatoon}")
+    @Operation(description = "Delete Dinatoon From User")
+    public ResponseEntity<Void> deleteDinatoonFromUser(Authentication authentication, @PathVariable Long dinatoon) {
+        var user = (User) authentication.getPrincipal();
+        dinatoonService.deleteUserDinatoon(user.getId(), dinatoon);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
