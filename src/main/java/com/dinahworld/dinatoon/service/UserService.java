@@ -12,6 +12,5 @@ public interface UserService {
     User getUserByEmail(String email);
     List<User> getAllUsers();
     User updateUser(Long id, User user);
-
     UserDetails createUserOAuth2(String email, String google);
 }

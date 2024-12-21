@@ -4,6 +4,7 @@ import com.dinahworld.dinatoon.dto.DinatoonDto;
 import com.dinahworld.dinatoon.exception.DinatoonException;
 import com.dinahworld.dinatoon.exception.UserException;
 import com.dinahworld.dinatoon.model.Dinatoon;
+import com.dinahworld.dinatoon.model.User;
 import com.dinahworld.dinatoon.repository.DinatoonRepository;
 import com.dinahworld.dinatoon.service.DinatoonService;
 import com.dinahworld.dinatoon.service.UserService;
@@ -30,11 +31,12 @@ public class DinatoonServiceImpl implements DinatoonService {
     @Override
     @Transactional
     public Dinatoon createDinatoon(DinatoonDto dto) {
-        if (dinatoonRepository.findByName(dto.getName())) {
+        if (dinatoonRepository.findByName(dto.getName()).isPresent()) {
             throw new DinatoonException("Dinatoon already exist");
         }
         return dinatoonRepository.save(toEntity(dto));
     }
+
 
     @Override
     public Dinatoon getDinatoonById(Long id) {
@@ -84,8 +86,7 @@ public class DinatoonServiceImpl implements DinatoonService {
 
     @Override
     @Transactional
-    public Dinatoon saveManga(DinatoonDto dto, Long id) {
-        var user = userService.getUserById(id);
+    public Dinatoon saveManga(DinatoonDto dto, User user) {
         var dinatoon = createDinatoon(dto);
 
         if (!user.getDinatoons().contains(dinatoon)) {
@@ -99,14 +100,13 @@ public class DinatoonServiceImpl implements DinatoonService {
 
     @Override
     @Transactional
-    public List<Dinatoon> getAllUserDinatoon(Long id) {
-        return userService.getUserById(id).getDinatoons();
+    public List<Dinatoon> getAllUserDinatoon(User user) {
+        return user.getDinatoons();
     }
 
     @Override
     @Transactional
-    public void deleteUserDinatoon(Long userId, Long dinatoonId) {
-        var user = userService.getUserById(userId);
+    public void deleteUserDinatoon(User user, Long dinatoonId) {
         var dinatoon = getDinatoonById(dinatoonId);
         user.getDinatoons().remove(dinatoon);
         userService.saveUser(user);
