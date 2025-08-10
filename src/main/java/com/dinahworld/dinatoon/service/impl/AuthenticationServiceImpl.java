@@ -76,7 +76,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             }
             String token = jwtService.generateToken(user);
             log.info("User {} is authenticated", user.getId());
-            userService.saveUser(user);
             return token;
 
         } catch (Exception e) {

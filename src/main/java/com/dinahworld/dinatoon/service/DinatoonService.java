@@ -1,30 +1,17 @@
 package com.dinahworld.dinatoon.service;
 
 import com.dinahworld.dinatoon.dto.DinatoonDto;
-import com.dinahworld.dinatoon.model.Dinatoon;
-import com.dinahworld.dinatoon.model.User;
-import org.springframework.transaction.annotation.Transactional;
+import com.dinahworld.dinatoon.dto.DinatoonUserDto;
+import com.dinahworld.dinatoon.dto.LittleDinatoonDto;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface DinatoonService {
-    Dinatoon createDinatoon(DinatoonDto dto);
+    Mono<List<DinatoonUserDto>> searchDinatoonByTitle(String title);
 
-    Dinatoon getDinatoonById(Long id);
+    Mono<List<DinatoonDto>> searchDinatoonById(UUID id);
 
-    void deleteUserDinatoon(User user, Long dinatoonId);
-
-    @Transactional
-    void deleteDinatoon(Long id);
-
-    List<Dinatoon> getAllDinatoons();
-
-    Dinatoon updateDinatoon(Long id, DinatoonDto dto);
-
-    Mono<List<Dinatoon>> searchDinatoon(String title);
-
-    Dinatoon saveManga(DinatoonDto dto, User user);
-
-    List<Dinatoon> getAllUserDinatoon(User user);
+    Mono<LittleDinatoonDto> searchLittleDinatoonById(UUID id);
 }

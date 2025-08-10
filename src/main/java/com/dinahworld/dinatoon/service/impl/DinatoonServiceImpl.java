@@ -1,72 +1,31 @@
 package com.dinahworld.dinatoon.service.impl;
 
 import com.dinahworld.dinatoon.dto.DinatoonDto;
-import com.dinahworld.dinatoon.exception.DinatoonException;
-import com.dinahworld.dinatoon.exception.UserException;
-import com.dinahworld.dinatoon.model.Dinatoon;
-import com.dinahworld.dinatoon.model.User;
-import com.dinahworld.dinatoon.repository.DinatoonRepository;
+import com.dinahworld.dinatoon.dto.DinatoonUserDto;
+import com.dinahworld.dinatoon.dto.LittleDinatoonDto;
 import com.dinahworld.dinatoon.service.DinatoonService;
 import com.dinahworld.dinatoon.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
 @RequiredArgsConstructor
 public class DinatoonServiceImpl implements DinatoonService {
-    private static final String DINATOON_NOT_FOUND = "Dinatoon not found with ID : ";
-    private final DinatoonRepository dinatoonRepository;
     private final WebClient webClient;
     private final String ATTRIBUTES = "attributes";
     private final UserService userService;
 
-    @Override
-    @Transactional
-    public Dinatoon createDinatoon(DinatoonDto dto) {
-        if (dinatoonRepository.findByName(dto.getName()).isPresent()) {
-            throw new DinatoonException("Dinatoon already exist");
-        }
-        return dinatoonRepository.save(toEntity(dto));
-    }
-
 
     @Override
-    public Dinatoon getDinatoonById(Long id) {
-        return dinatoonRepository.findById(id).orElseThrow(() -> new DinatoonException(DINATOON_NOT_FOUND));
-    }
-
-    @Override
-    @Transactional
-    public void deleteDinatoon(Long id) {
-        dinatoonRepository.deleteById(id);
-    }
-
-    @Override
-    public List<Dinatoon> getAllDinatoons() {
-        return dinatoonRepository.findAll();
-    }
-
-    @Override
-    public Dinatoon updateDinatoon(Long id, DinatoonDto dto) {
-        dinatoonRepository.findById(id).orElseThrow(() -> new UserException(DINATOON_NOT_FOUND));
-        var dinatoon = toEntity(dto);
-        dinatoon.setId(id);
-        dinatoonRepository.deleteById(id);
-        dinatoonRepository.save(dinatoon);
-
-        return dinatoon;
-    }
-
-    @Override
-    public Mono<List<Dinatoon>> searchDinatoon(String titleParam) {
+    public Mono<List<DinatoonUserDto>> searchDinatoonByTitle(String titleParam) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/manga")
                         .queryParam("limit", 10)
@@ -85,52 +44,70 @@ public class DinatoonServiceImpl implements DinatoonService {
     }
 
     @Override
-    @Transactional
-    public Dinatoon saveManga(DinatoonDto dto, User user) {
-        var dinatoon = createDinatoon(dto);
-
-        if (!user.getDinatoons().contains(dinatoon)) {
-            user.getDinatoons().add(dinatoon);
-            userService.saveUser(user);
-            return dinatoon;
-        } else {
-            throw new UserException("Dinatoon already exists in User List");
-        }
+    public Mono<List<DinatoonDto>> searchDinatoonById(UUID id) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/manga/" + id)
+                        .queryParam("includes[]", "cover_art")
+                        .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .map(this::mapJsonDataToDinatoonById);
     }
 
     @Override
-    @Transactional
-    public List<Dinatoon> getAllUserDinatoon(User user) {
-        return user.getDinatoons();
+    public Mono<LittleDinatoonDto> searchLittleDinatoonById(UUID id) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/manga/" + id)
+                        .queryParam("includes[]", "cover_art")
+                        .build())
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .map(this::mapJsonDataToDinatoonForHome);
     }
 
-    @Override
-    @Transactional
-    public void deleteUserDinatoon(User user, Long dinatoonId) {
-        var dinatoon = getDinatoonById(dinatoonId);
-        user.getDinatoons().remove(dinatoon);
-        userService.saveUser(user);
+    private LittleDinatoonDto mapJsonDataToDinatoonForHome(JsonNode jsonNode) {
+
+        var id = UUID.fromString(jsonNode.get("data").get("id").asText());
+        var title = extractText(jsonNode.get("data"), ATTRIBUTES, "title", "en");
+        var imageUrl = extractCoverImage(jsonNode.get("data"));
+
+        return LittleDinatoonDto.builder()
+                .id(id)
+                .name(title)
+                .imageUrl(imageUrl)
+                .build();
     }
 
+    private List<DinatoonDto> mapJsonDataToDinatoonById(JsonNode jsonNode) {
+        var mangas = new ArrayList<DinatoonDto>();
 
+        var genre = jsonNode.get("data").get("type").asText();
+        var id = UUID.fromString(jsonNode.get("data").get("id").asText());
+        var title = extractText(jsonNode.get("data"), ATTRIBUTES, "title", "en");
+        var description = extractText(jsonNode.get("data"), ATTRIBUTES, "description", "en");
+        var lastChapter = parseLastChapter(jsonNode.get("data"), ATTRIBUTES, "lastChapter");
+        var imageUrl = extractCoverImage(jsonNode.get("data"));
 
-    private List<Dinatoon> mapJsonDataToDinatoon(JsonNode jsonNode) {
-        var mangas = new ArrayList<Dinatoon>();
+        mangas.add(DinatoonDto.builder()
+                .id(id)
+                .name(title)
+                .genre(genre)
+                .imageUrl(imageUrl)
+                .description(description)
+                .totalChapters(lastChapter)
+                .build());
+
+        return mangas;
+    }
+
+    private List<DinatoonUserDto> mapJsonDataToDinatoon(JsonNode jsonNode) {
+        var mangas = new ArrayList<DinatoonUserDto>();
 
         jsonNode.get("data").forEach(mangaNode -> {
-            var genre = mangaNode.get("type").asText();
-            var title = extractText(mangaNode, ATTRIBUTES, "title", "en");
-            var description = extractText(mangaNode, ATTRIBUTES, "description", "en");
-            var lastChapter = parseLastChapter(mangaNode, ATTRIBUTES, "lastChapter");
+            var id = UUID.fromString(mangaNode.get("id").asText());
             var imageUrl = extractCoverImage(mangaNode);
 
-            mangas.add(Dinatoon.builder()
-                    .name(title)
-                    .genre(genre)
-                    .imageUrl(imageUrl)
-                    .description(description)
-                    .totalChapters(lastChapter)
-                    .build());
+            mangas.add(new DinatoonUserDto(id, imageUrl));
         });
 
         return mangas;
@@ -167,15 +144,5 @@ public class DinatoonServiceImpl implements DinatoonService {
             }
         }
         return null;
-    }
-
-    private Dinatoon toEntity(DinatoonDto dto) {
-        return Dinatoon.builder()
-                .name(dto.getName())
-                .genre(dto.getGenre())
-                .imageUrl(dto.getImageUrl())
-                .description(dto.getDescription())
-                .totalChapters(dto.getTotalChapters())
-                .build();
     }
 }

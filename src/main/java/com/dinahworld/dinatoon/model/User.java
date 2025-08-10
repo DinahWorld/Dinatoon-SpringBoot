@@ -2,14 +2,11 @@ package com.dinahworld.dinatoon.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -33,19 +30,6 @@ public class User implements UserDetails, Serializable {
 
     @Column(nullable = false)
     private String email;
-
-    @ManyToMany
-    @Fetch(FetchMode.JOIN)
-    @JoinTable(
-            name = "user_dinatoons",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "dinatoon_id")
-    )
-    private List<Dinatoon> dinatoons = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Fetch(FetchMode.JOIN)
-    private List<Category> categories = new ArrayList<>();
 
     @ManyToOne(targetEntity = Role.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")

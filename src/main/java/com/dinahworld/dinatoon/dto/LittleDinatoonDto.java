@@ -7,11 +7,8 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class DinatoonDto {
+public class LittleDinatoonDto {
     private UUID id;
     private String name;
-    private String genre;
     private String imageUrl;
-    private String description;
-    private Integer totalChapters;
 }
