@@ -57,8 +57,12 @@ CREATE TABLE IF NOT EXISTS confirmation_token
 );
 
 -- Index pour optimiser les requêtes
-CREATE INDEX idx_user_id ON user_dinatoons (user_id);
-CREATE INDEX idx_dinatoon_id ON user_dinatoons (dinatoon_id);
-CREATE INDEX idx_category_user_id ON categories (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_id ON user_dinatoons (user_id);
+CREATE INDEX IF NOT EXISTS idx_dinatoon_id ON user_dinatoons (dinatoon_id);
+CREATE INDEX IF NOT EXISTS idx_category_user_id ON categories (user_id);
 ALTER TABLE user_dinatoons
     ADD CONSTRAINT unique_dinatoon UNIQUE (dinatoon_id);
+
+INSERT INTO roles (name)
+VALUES ('ADMIN'),
+       ('USER');
